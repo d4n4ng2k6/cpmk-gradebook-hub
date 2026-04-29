@@ -1,5 +1,6 @@
-// Parser untuk file Excel SpreadsheetML XML (.xls dengan format XML 2003)
-// dari sistem akademik kampus.
+// Parser untuk file Excel SpreadsheetML XML 2003 dari sistem akademik kampus.
+// File ini terkadang mengandung entity tidak valid (mis. `&gt=` di formula),
+// jadi kita pakai pendekatan regex yang toleran daripada DOMParser ketat.
 
 export interface ParsedCourse {
   kode_mk: string;
@@ -12,16 +13,50 @@ export interface ParsedCourse {
   students: { npm: string; nama: string }[];
 }
 
+interface RawRow {
+  cells: string[]; // text content per Cell, urut sesuai kemunculan (tanpa skip Index)
+}
+
+function decodeEntities(s: string): string {
+  return s
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'");
+}
+
+function parseRows(xml: string): RawRow[] {
+  const rows: RawRow[] = [];
+  const rowRe = /<Row\b[^>]*>([\s\S]*?)<\/Row>/gi;
+  const cellRe = /<Cell\b[^>]*>([\s\S]*?)<\/Cell>/gi;
+  const dataRe = /<Data\b[^>]*>([\s\S]*?)<\/Data>/i;
+
+  let rm: RegExpExecArray | null;
+  while ((rm = rowRe.exec(xml))) {
+    const inner = rm[1];
+    const cells: string[] = [];
+    let cm: RegExpExecArray | null;
+    cellRe.lastIndex = 0;
+    while ((cm = cellRe.exec(inner))) {
+      const dm = dataRe.exec(cm[1]);
+      cells.push(dm ? decodeEntities(dm[1]).trim() : "");
+    }
+    rows.push({ cells });
+  }
+  return rows;
+}
+
 export async function parseAcademicXls(file: File): Promise<ParsedCourse> {
   const text = await file.text();
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(text, "text/xml");
 
-  const err = doc.querySelector("parsererror");
-  if (err) throw new Error("File bukan format Excel XML 2003 yang dikenali.");
+  if (!/<Workbook[\s>]/i.test(text) && !/<Worksheet[\s>]/i.test(text)) {
+    throw new Error(
+      "File tidak dikenali. Gunakan berkas .xls dari sistem akademik (format Excel XML 2003)."
+    );
+  }
 
-  // Header info: cari Row dimana Cell pertama berisi label
-  const rows = Array.from(doc.getElementsByTagName("Row"));
+  const rows = parseRows(text);
 
   const meta: Record<string, string> = {};
   const labels = [
@@ -35,24 +70,19 @@ export async function parseAcademicXls(file: File): Promise<ParsedCourse> {
   ];
 
   for (const r of rows) {
-    const cells = Array.from(r.getElementsByTagName("Cell"));
-    if (cells.length < 3) continue;
-    const first = textOf(cells[0]);
+    if (r.cells.length < 2) continue;
+    const first = r.cells[0];
     if (labels.includes(first)) {
-      // value typically in cell index 2 (after the ":" cell)
-      meta[first] = textOf(cells[2]) || textOf(cells[1]);
+      // Nilai biasanya di cell ke-3 (setelah ":"). Ambil cell non-kosong pertama setelah index 0.
+      const val = r.cells.slice(1).find((c) => c && c !== ":") ?? "";
+      meta[first] = val;
     }
   }
 
-  // Mahasiswa: baris setelah header tabel; kita identifikasi baris yang
-  // cell[0] berupa angka (No.), cell[1] berupa NIM (12 digit), cell[3] nama
   const students: { npm: string; nama: string }[] = [];
   for (const r of rows) {
-    const cells = Array.from(r.getElementsByTagName("Cell"));
-    if (cells.length < 4) continue;
-    const c0 = textOf(cells[0]);
-    const c1 = textOf(cells[1]);
-    const c3 = textOf(cells[3]);
+    if (r.cells.length < 4) continue;
+    const [c0, c1, , c3] = r.cells;
     if (/^\d+$/.test(c0) && /^\d{6,}$/.test(c1) && c3) {
       students.push({ npm: c1, nama: c3.trim() });
     }
@@ -68,9 +98,4 @@ export async function parseAcademicXls(file: File): Promise<ParsedCourse> {
     jenjang: meta["Jenjang Studi"] ?? "",
     students,
   };
-}
-
-function textOf(cell: Element): string {
-  const data = cell.getElementsByTagName("Data")[0];
-  return data?.textContent?.trim() ?? "";
 }
