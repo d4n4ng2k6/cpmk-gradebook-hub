@@ -14,16 +14,308 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      component_cpmk: {
+        Row: {
+          component_id: string
+          cpmk_id: string
+          id: string
+          kontribusi: number
+        }
+        Insert: {
+          component_id: string
+          cpmk_id: string
+          id?: string
+          kontribusi?: number
+        }
+        Update: {
+          component_id?: string
+          cpmk_id?: string
+          id?: string
+          kontribusi?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "component_cpmk_component_id_fkey"
+            columns: ["component_id"]
+            isOneToOne: false
+            referencedRelation: "components"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "component_cpmk_cpmk_id_fkey"
+            columns: ["cpmk_id"]
+            isOneToOne: false
+            referencedRelation: "cpmk"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      components: {
+        Row: {
+          bobot: number
+          course_id: string
+          created_at: string
+          id: string
+          nama: string
+          urutan: number
+        }
+        Insert: {
+          bobot?: number
+          course_id: string
+          created_at?: string
+          id?: string
+          nama: string
+          urutan?: number
+        }
+        Update: {
+          bobot?: number
+          course_id?: string
+          created_at?: string
+          id?: string
+          nama?: string
+          urutan?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "components_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      courses: {
+        Row: {
+          created_at: string
+          id: string
+          jenjang: string | null
+          kelas: string | null
+          kode_mk: string
+          lecturer_id: string
+          nama_mk: string
+          prodi: string | null
+          semester: string | null
+          tahun_ajaran: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          jenjang?: string | null
+          kelas?: string | null
+          kode_mk: string
+          lecturer_id: string
+          nama_mk: string
+          prodi?: string | null
+          semester?: string | null
+          tahun_ajaran?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          jenjang?: string | null
+          kelas?: string | null
+          kode_mk?: string
+          lecturer_id?: string
+          nama_mk?: string
+          prodi?: string | null
+          semester?: string | null
+          tahun_ajaran?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      cpmk: {
+        Row: {
+          bobot: number
+          course_id: string
+          created_at: string
+          deskripsi: string
+          id: string
+          kode: string
+        }
+        Insert: {
+          bobot?: number
+          course_id: string
+          created_at?: string
+          deskripsi?: string
+          id?: string
+          kode: string
+        }
+        Update: {
+          bobot?: number
+          course_id?: string
+          created_at?: string
+          deskripsi?: string
+          id?: string
+          kode?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cpmk_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      enrollments: {
+        Row: {
+          course_id: string
+          created_at: string
+          id: string
+          student_id: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          id?: string
+          student_id: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          id?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enrollments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enrollments_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string
+          id: string
+          nidn: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          full_name?: string
+          id: string
+          nidn?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string
+          id?: string
+          nidn?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      scores: {
+        Row: {
+          component_id: string
+          enrollment_id: string
+          id: string
+          nilai: number
+          updated_at: string
+        }
+        Insert: {
+          component_id: string
+          enrollment_id: string
+          id?: string
+          nilai?: number
+          updated_at?: string
+        }
+        Update: {
+          component_id?: string
+          enrollment_id?: string
+          id?: string
+          nilai?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scores_component_id_fkey"
+            columns: ["component_id"]
+            isOneToOne: false
+            referencedRelation: "components"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scores_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "enrollments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      students: {
+        Row: {
+          created_at: string
+          id: string
+          nama: string
+          npm: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nama: string
+          npm: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nama?: string
+          npm?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      owns_course: { Args: { _course_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "dosen"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +442,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "dosen"],
+    },
   },
 } as const
