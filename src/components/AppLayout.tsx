@@ -1,7 +1,7 @@
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { GraduationCap, LayoutDashboard, BookOpen, LogOut, Upload } from "lucide-react";
+import { GraduationCap, LayoutDashboard, BookOpen, LogOut, Upload, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const AppLayout = ({ children }: { children: React.ReactNode }) => {
@@ -13,6 +13,7 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
     { to: "/", label: "Dasbor", icon: LayoutDashboard },
     { to: "/courses", label: "Matakuliah", icon: BookOpen },
     { to: "/upload", label: "Impor Excel", icon: Upload },
+    ...(role === "admin" ? [{ to: "/admin", label: "Administrasi", icon: Shield }] : []),
   ];
 
   return (
