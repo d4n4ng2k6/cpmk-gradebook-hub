@@ -1,7 +1,7 @@
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { GraduationCap, LayoutDashboard, BookOpen, LogOut, Upload, Shield } from "lucide-react";
+import { GraduationCap, LayoutDashboard, BookOpen, LogOut, Upload, Shield, KeyRound } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const AppLayout = ({ children }: { children: React.ReactNode }) => {
@@ -53,6 +53,14 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
         <div className="p-4 border-t border-sidebar-border">
           <div className="text-sm font-medium truncate">{fullName || "Pengguna"}</div>
           <div className="text-xs text-sidebar-foreground/60 capitalize mb-3">{role}</div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full mb-2 text-sidebar-foreground hover:bg-sidebar-accent/60"
+            onClick={() => nav("/change-password")}
+          >
+            <KeyRound className="h-4 w-4 mr-2" /> Ubah Password
+          </Button>
           <Button
             variant="secondary"
             size="sm"
