@@ -112,6 +112,27 @@ const Auth = () => {
               </Button>
             </form>
           </Tabs>
+          <div className="mt-6 pt-4 border-t text-center">
+            <button
+              type="button"
+              className="text-xs text-muted-foreground hover:text-primary underline"
+              onClick={async () => {
+                setLoading(true);
+                try {
+                  const { data, error } = await supabase.functions.invoke("seed-admin");
+                  if (error) throw error;
+                  toast.success(`Admin siap. Email: ${data.email} / Password: ${data.password}`, { duration: 10000 });
+                  setEmail(data.email);
+                  setPassword(data.password);
+                  setTab("login");
+                } catch (e: any) {
+                  toast.error(e.message ?? "Gagal membuat admin");
+                } finally { setLoading(false); }
+              }}
+            >
+              Buat / reset akun admin default
+            </button>
+          </div>
         </Card>
       </div>
     </div>
