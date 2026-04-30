@@ -1,19 +1,29 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/AppLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Upload, FileSpreadsheet, CheckCircle2 } from "lucide-react";
 import { parseAcademicXls, ParsedCourse } from "@/lib/excelParser";
 import { toast } from "sonner";
+
+interface Prodi { id: string; kode: string; nama: string; }
 
 const UploadExcel = () => {
   const { user } = useAuth();
   const nav = useNavigate();
   const [parsed, setParsed] = useState<ParsedCourse | null>(null);
   const [importing, setImporting] = useState(false);
+  const [prodi, setProdi] = useState<Prodi[]>([]);
+  const [prodiId, setProdiId] = useState<string>("");
+
+  useEffect(() => {
+    supabase.from("prodi").select("id, kode, nama").order("kode").then(({ data }) => setProdi((data ?? []) as Prodi[]));
+  }, []);
 
   const handleFile = async (file: File) => {
     try {
@@ -31,67 +41,38 @@ const UploadExcel = () => {
 
   const doImport = async () => {
     if (!parsed || !user) return;
+    if (!prodiId) { toast.error("Pilih prodi terlebih dahulu"); return; }
     setImporting(true);
     try {
-      // 1. Insert course
-      const { data: course, error: ce } = await supabase
-        .from("courses")
-        .insert({
-          lecturer_id: user.id,
-          kode_mk: parsed.kode_mk,
-          nama_mk: parsed.nama_mk,
-          kelas: parsed.kelas,
-          tahun_ajaran: parsed.tahun_ajaran,
-          semester: parsed.semester,
-          prodi: parsed.prodi,
-          jenjang: parsed.jenjang,
-        })
-        .select()
-        .single();
+      const { data: course, error: ce } = await supabase.from("courses").insert({
+        lecturer_id: user.id,
+        kode_mk: parsed.kode_mk,
+        nama_mk: parsed.nama_mk,
+        kelas: parsed.kelas,
+        tahun_ajaran: parsed.tahun_ajaran,
+        semester: parsed.semester,
+        prodi: parsed.prodi,
+        prodi_id: prodiId,
+        jenjang: parsed.jenjang,
+      }).select().single();
       if (ce) throw ce;
 
-      // 2. Upsert students
-      const { data: existing } = await supabase
-        .from("students")
-        .select("id, npm")
-        .in("npm", parsed.students.map((s) => s.npm));
+      const { data: existing } = await supabase.from("students").select("id, npm").in("npm", parsed.students.map((s) => s.npm));
       const existingMap = new Map(existing?.map((s) => [s.npm, s.id]) ?? []);
-
       const toInsert = parsed.students.filter((s) => !existingMap.has(s.npm));
       if (toInsert.length > 0) {
-        const { data: inserted, error: ie } = await supabase
-          .from("students")
-          .insert(toInsert.map((s) => ({ npm: s.npm, nama: s.nama })))
-          .select("id, npm");
+        const { data: inserted, error: ie } = await supabase.from("students")
+          .insert(toInsert.map((s) => ({ npm: s.npm, nama: s.nama }))).select("id, npm");
         if (ie) throw ie;
         inserted?.forEach((s) => existingMap.set(s.npm, s.id));
       }
 
-      // 3. Enrollments
       const enrollments = parsed.students.map((s) => ({
         course_id: course.id,
         student_id: existingMap.get(s.npm)!,
       }));
       const { error: ee } = await supabase.from("enrollments").insert(enrollments);
       if (ee) throw ee;
-
-      // 4. Default CPMK & komponen
-      const { data: cpmkRows } = await supabase.from("cpmk").insert([
-        { course_id: course.id, kode: "CPMK-1", deskripsi: "Capaian 1", bobot: 50 },
-        { course_id: course.id, kode: "CPMK-2", deskripsi: "Capaian 2", bobot: 50 },
-      ]).select();
-      const { data: compRows } = await supabase.from("components").insert([
-        { course_id: course.id, nama: "Tugas", bobot: 20, urutan: 1 },
-        { course_id: course.id, nama: "UTS", bobot: 35, urutan: 2 },
-        { course_id: course.id, nama: "UAS", bobot: 45, urutan: 3 },
-      ]).select();
-
-      // map default: setiap komponen 100% ke CPMK-1
-      if (cpmkRows && compRows) {
-        await supabase.from("component_cpmk").insert(
-          compRows.map((c) => ({ component_id: c.id, cpmk_id: cpmkRows[0].id, kontribusi: 100 }))
-        );
-      }
 
       toast.success("Matakuliah berhasil diimpor!");
       nav(`/courses/${course.id}`);
@@ -107,21 +88,27 @@ const UploadExcel = () => {
       <div className="mb-6">
         <h1 className="text-3xl font-bold tracking-tight">Impor dari Excel</h1>
         <p className="text-muted-foreground mt-1">
-          Unggah berkas .xls daftar nilai dari sistem akademik kampus. Sistem akan mengekstrak info matakuliah dan daftar mahasiswa.
+          Unggah berkas .xls daftar nilai dari sistem akademik. Sistem akan mengekstrak info matakuliah dan daftar mahasiswa.
         </p>
       </div>
 
       <Card className="p-8">
+        <div className="mb-6 max-w-md">
+          <Label className="mb-2 block">Program Studi *</Label>
+          <Select value={prodiId} onValueChange={setProdiId}>
+            <SelectTrigger><SelectValue placeholder="Pilih prodi untuk matakuliah ini" /></SelectTrigger>
+            <SelectContent>
+              {prodi.length === 0 && <div className="px-3 py-2 text-sm text-muted-foreground">Belum ada prodi. Hubungi admin.</div>}
+              {prodi.map((p) => <SelectItem key={p.id} value={p.id}>{p.kode} — {p.nama}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+
         <label className="block border-2 border-dashed border-border rounded-xl p-12 text-center cursor-pointer hover:border-primary hover:bg-secondary/40 transition-colors">
           <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
           <div className="font-medium mb-1">Klik untuk memilih file</div>
           <div className="text-sm text-muted-foreground">Format .xls (Excel XML 2003) dari sistem akademik</div>
-          <input
-            type="file"
-            accept=".xls,.xml"
-            className="hidden"
-            onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
-          />
+          <input type="file" accept=".xls,.xml" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
         </label>
 
         {parsed && (
@@ -152,7 +139,7 @@ const UploadExcel = () => {
                 </div>
               )}
             </div>
-            <Button onClick={doImport} disabled={importing} className="bg-gradient-primary">
+            <Button onClick={doImport} disabled={importing || !prodiId} className="bg-gradient-primary">
               {importing ? "Mengimpor..." : "Konfirmasi & Impor"}
             </Button>
           </Card>
