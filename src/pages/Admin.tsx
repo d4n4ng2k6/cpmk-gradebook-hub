@@ -28,7 +28,7 @@ const Admin = () => {
         <p className="text-muted-foreground mt-1">Kelola Prodi, CPL, CPMK, dan Sub-CPMK master.</p>
       </div>
       <Tabs defaultValue="prodi">
-        <TabsList className="mb-6">
+        <TabsList className="mb-6 w-full grid grid-cols-2 sm:grid-cols-4 h-auto">
           <TabsTrigger value="prodi"><Building2 className="h-4 w-4 mr-2" />Prodi</TabsTrigger>
           <TabsTrigger value="cpl"><Target className="h-4 w-4 mr-2" />CPL</TabsTrigger>
           <TabsTrigger value="cpmk"><ListTree className="h-4 w-4 mr-2" />CPMK</TabsTrigger>
@@ -73,15 +73,15 @@ const ProdiTab = () => {
     toast.success("Prodi tersimpan"); load();
   };
   return (
-    <Card className="p-6">
+    <Card className="p-4 md:p-6">
       <h2 className="text-lg font-semibold mb-4">Program Studi</h2>
       <div className="space-y-3">
         {items.map((p, i) => (
-          <div key={p.id} className="grid grid-cols-12 gap-3 items-center">
-            <Input className="col-span-2" placeholder="Kode" value={p.kode} onChange={(e) => upd(i, { kode: e.target.value })} />
-            <Input className="col-span-7" placeholder="Nama Prodi" value={p.nama} onChange={(e) => upd(i, { nama: e.target.value })} />
-            <Input className="col-span-2" placeholder="Jenjang" value={p.jenjang ?? ""} onChange={(e) => upd(i, { jenjang: e.target.value })} />
-            <Button size="icon" variant="ghost" onClick={() => remove(i)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+          <div key={p.id} className="grid grid-cols-12 gap-2 md:gap-3 items-center">
+            <Input className="col-span-4 md:col-span-2" placeholder="Kode" value={p.kode} onChange={(e) => upd(i, { kode: e.target.value })} />
+            <Input className="col-span-12 md:col-span-7 order-3 md:order-none" placeholder="Nama Prodi" value={p.nama} onChange={(e) => upd(i, { nama: e.target.value })} />
+            <Input className="col-span-6 md:col-span-2" placeholder="Jenjang" value={p.jenjang ?? ""} onChange={(e) => upd(i, { jenjang: e.target.value })} />
+            <Button size="icon" variant="ghost" className="col-span-2 md:col-span-1 justify-self-end" onClick={() => remove(i)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
           </div>
         ))}
       </div>
@@ -127,7 +127,7 @@ const CplTab = () => {
     setItems((data ?? []) as CPL[]);
   };
   return (
-    <Card className="p-6">
+    <Card className="p-4 md:p-6">
       <h2 className="text-lg font-semibold mb-4">Capaian Pembelajaran Lulusan</h2>
       <div className="mb-4 max-w-md">
         <Select value={pid} onValueChange={setPid}>
@@ -138,10 +138,10 @@ const CplTab = () => {
       {pid && <>
         <div className="space-y-3">
           {items.map((c, i) => (
-            <div key={c.id} className="grid grid-cols-12 gap-3 items-center">
-              <Input className="col-span-2" value={c.kode} onChange={(e) => upd(i, { kode: e.target.value })} />
-              <Input className="col-span-9" placeholder="Deskripsi CPL" value={c.deskripsi} onChange={(e) => upd(i, { deskripsi: e.target.value })} />
-              <Button size="icon" variant="ghost" onClick={() => remove(i)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+            <div key={c.id} className="grid grid-cols-12 gap-2 md:gap-3 items-center">
+              <Input className="col-span-4 md:col-span-2" value={c.kode} onChange={(e) => upd(i, { kode: e.target.value })} />
+              <Input className="col-span-12 md:col-span-9 order-3 md:order-none" placeholder="Deskripsi CPL" value={c.deskripsi} onChange={(e) => upd(i, { deskripsi: e.target.value })} />
+              <Button size="icon" variant="ghost" className="col-span-8 md:col-span-1 justify-self-end" onClick={() => remove(i)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
             </div>
           ))}
         </div>
@@ -195,9 +195,9 @@ const CpmkTab = () => {
     setItems((data ?? []) as CPMK[]);
   };
   return (
-    <Card className="p-6">
+    <Card className="p-4 md:p-6">
       <h2 className="text-lg font-semibold mb-4">CPMK (per CPL)</h2>
-      <div className="grid grid-cols-2 gap-3 mb-4 max-w-2xl">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 max-w-2xl">
         <Select value={pid} onValueChange={setPid}>
           <SelectTrigger><SelectValue placeholder="Pilih Prodi" /></SelectTrigger>
           <SelectContent>{prodi.map((p) => <SelectItem key={p.id} value={p.id}>{p.kode} — {p.nama}</SelectItem>)}</SelectContent>
@@ -213,14 +213,14 @@ const CpmkTab = () => {
         </div>
         <div className="space-y-3">
           {items.map((c, i) => (
-            <div key={c.id} className="grid grid-cols-12 gap-3 items-center">
-              <Input className="col-span-2" value={c.kode} onChange={(e) => upd(i, { kode: e.target.value })} />
-              <Input className="col-span-7" placeholder="Deskripsi CPMK" value={c.deskripsi} onChange={(e) => upd(i, { deskripsi: e.target.value })} />
-              <div className="col-span-2 relative">
+            <div key={c.id} className="grid grid-cols-12 gap-2 md:gap-3 items-center">
+              <Input className="col-span-4 md:col-span-2" value={c.kode} onChange={(e) => upd(i, { kode: e.target.value })} />
+              <Input className="col-span-12 md:col-span-7 order-4 md:order-none" placeholder="Deskripsi CPMK" value={c.deskripsi} onChange={(e) => upd(i, { deskripsi: e.target.value })} />
+              <div className="col-span-6 md:col-span-2 relative">
                 <Input type="number" value={c.bobot} onChange={(e) => upd(i, { bobot: Number(e.target.value) })} />
                 <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">%</span>
               </div>
-              <Button size="icon" variant="ghost" onClick={() => remove(i)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+              <Button size="icon" variant="ghost" className="col-span-2 md:col-span-1 justify-self-end" onClick={() => remove(i)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
             </div>
           ))}
         </div>
@@ -280,9 +280,9 @@ const SubTab = () => {
     setItems((data ?? []) as SubCPMK[]);
   };
   return (
-    <Card className="p-6">
+    <Card className="p-4 md:p-6">
       <h2 className="text-lg font-semibold mb-4">Sub-CPMK (per CPMK)</h2>
-      <div className="grid grid-cols-3 gap-3 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
         <Select value={pid} onValueChange={setPid}>
           <SelectTrigger><SelectValue placeholder="Pilih Prodi" /></SelectTrigger>
           <SelectContent>{prodi.map((p) => <SelectItem key={p.id} value={p.id}>{p.kode} — {p.nama}</SelectItem>)}</SelectContent>
@@ -300,19 +300,21 @@ const SubTab = () => {
         <div className="flex justify-end mb-2">
           <Badge variant={Math.abs(total - 100) < 0.01 ? "default" : "destructive"}>Total bobot dalam CPMK: {total}%</Badge>
         </div>
-        <Table>
-          <TableHeader><TableRow><TableHead>Kode</TableHead><TableHead>Deskripsi</TableHead><TableHead className="w-32">Bobot</TableHead><TableHead className="w-12"></TableHead></TableRow></TableHeader>
-          <TableBody>
-            {items.map((s, i) => (
-              <TableRow key={s.id}>
-                <TableCell><Input value={s.kode} onChange={(e) => upd(i, { kode: e.target.value })} /></TableCell>
-                <TableCell><Input value={s.deskripsi} onChange={(e) => upd(i, { deskripsi: e.target.value })} /></TableCell>
-                <TableCell><Input type="number" value={s.bobot} onChange={(e) => upd(i, { bobot: Number(e.target.value) })} /></TableCell>
-                <TableCell><Button size="icon" variant="ghost" onClick={() => remove(i)}><Trash2 className="h-4 w-4 text-destructive" /></Button></TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <div className="overflow-x-auto -mx-4 md:mx-0 px-4 md:px-0">
+          <Table>
+            <TableHeader><TableRow><TableHead>Kode</TableHead><TableHead>Deskripsi</TableHead><TableHead className="w-32">Bobot</TableHead><TableHead className="w-12"></TableHead></TableRow></TableHeader>
+            <TableBody>
+              {items.map((s, i) => (
+                <TableRow key={s.id}>
+                  <TableCell><Input value={s.kode} onChange={(e) => upd(i, { kode: e.target.value })} /></TableCell>
+                  <TableCell><Input value={s.deskripsi} onChange={(e) => upd(i, { deskripsi: e.target.value })} /></TableCell>
+                  <TableCell><Input type="number" value={s.bobot} onChange={(e) => upd(i, { bobot: Number(e.target.value) })} /></TableCell>
+                  <TableCell><Button size="icon" variant="ghost" onClick={() => remove(i)}><Trash2 className="h-4 w-4 text-destructive" /></Button></TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
         <div className="flex gap-2 mt-4">
           <Button variant="outline" onClick={add}><Plus className="h-4 w-4 mr-2" />Tambah Sub-CPMK</Button>
           <Button onClick={save} className="bg-gradient-primary"><Save className="h-4 w-4 mr-2" />Simpan</Button>
