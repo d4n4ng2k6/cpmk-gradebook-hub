@@ -29,16 +29,18 @@ const Admin = () => {
         <p className="text-muted-foreground mt-1">Kelola Prodi, CPL, CPMK, dan Sub-CPMK master.</p>
       </div>
       <Tabs defaultValue="prodi">
-        <TabsList className="mb-6 w-full grid grid-cols-2 sm:grid-cols-4 h-auto">
+        <TabsList className="mb-6 w-full grid grid-cols-2 sm:grid-cols-5 h-auto">
           <TabsTrigger value="prodi"><Building2 className="h-4 w-4 mr-2" />Prodi</TabsTrigger>
           <TabsTrigger value="cpl"><Target className="h-4 w-4 mr-2" />CPL</TabsTrigger>
           <TabsTrigger value="cpmk"><ListTree className="h-4 w-4 mr-2" />CPMK</TabsTrigger>
           <TabsTrigger value="sub"><ListChecks className="h-4 w-4 mr-2" />Sub-CPMK</TabsTrigger>
+          <TabsTrigger value="report"><BarChart3 className="h-4 w-4 mr-2" />Laporan CPL</TabsTrigger>
         </TabsList>
         <TabsContent value="prodi"><ProdiTab /></TabsContent>
         <TabsContent value="cpl"><CplTab /></TabsContent>
         <TabsContent value="cpmk"><CpmkTab /></TabsContent>
         <TabsContent value="sub"><SubTab /></TabsContent>
+        <TabsContent value="report"><ReportTab /></TabsContent>
       </Tabs>
     </AppLayout>
   );
