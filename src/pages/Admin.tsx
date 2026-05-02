@@ -28,7 +28,7 @@ const Admin = () => {
         <p className="text-muted-foreground mt-1">Kelola Prodi, CPL, CPMK, dan Sub-CPMK master.</p>
       </div>
       <Tabs defaultValue="prodi">
-        <TabsList className="mb-6">
+        <TabsList className="mb-6 w-full grid grid-cols-2 sm:grid-cols-4 h-auto">
           <TabsTrigger value="prodi"><Building2 className="h-4 w-4 mr-2" />Prodi</TabsTrigger>
           <TabsTrigger value="cpl"><Target className="h-4 w-4 mr-2" />CPL</TabsTrigger>
           <TabsTrigger value="cpmk"><ListTree className="h-4 w-4 mr-2" />CPMK</TabsTrigger>
