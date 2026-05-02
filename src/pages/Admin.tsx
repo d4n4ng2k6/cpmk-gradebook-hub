@@ -9,9 +9,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Save, Trash2, Building2, Target, ListTree, ListChecks } from "lucide-react";
+import { Plus, Save, Trash2, Building2, Target, ListTree, ListChecks, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
 import { Navigate } from "react-router-dom";
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip as RTooltip } from "recharts";
 
 interface Prodi { id: string; kode: string; nama: string; jenjang: string | null; }
 interface CPL { id: string; prodi_id: string; kode: string; deskripsi: string; }
